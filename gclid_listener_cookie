@@ -1,3 +1,5 @@
+<!-- GCLID Listener and Cookie creation tag -->
+
 <script>
   (function() {
     // Function to get URL parameter
