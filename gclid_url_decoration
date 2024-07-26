@@ -20,13 +20,13 @@ try {
         // Function to add gclid to the URL
         function addGclidToUrl(url) {
             var urlObj = new URL(url);
-            if (urlObj.origin === "https://www.store-site.com") {
-                // Direct link to store-site.com"
+            if (urlObj.origin === "https://www.website-2.com.com") {
+                // Direct link to website-2.com.com"
                 if (!urlObj.searchParams.has('gclid')) {
                     urlObj.searchParams.set('gclid', gclidValue);
                 }
-            } else if (urlObj.origin === "https://www.affiliate-redirect.com") {
-                // affiliate-redirect link
+            } else if (urlObj.origin === "https://www.affiliate-marketing-redirect.com") {
+                //affiliate-marketing-redirect link
                 var htmlUrl = urlObj.searchParams.get('htmlurl');
                 if (htmlUrl) {
                     var htmlUrlObj = new URL(htmlUrl);
@@ -42,10 +42,10 @@ try {
         function isTargetUrl(url) {
             try {
                 var urlObj = new URL(url);
-                return urlObj.origin === "https://www.store-site.com"" ||
-                       (urlObj.origin === "https://www.affiliate-redirect.com" && 
+                return urlObj.origin === "https://www.website-2.com" ||
+                       (urlObj.origin === "https://www.affiliate-marketing-redirect.com" && 
                         urlObj.searchParams.has('htmlurl') && 
-                        urlObj.searchParams.get('htmlurl').includes('https://www.store-site.com"'));
+                        urlObj.searchParams.get('htmlurl').includes('https://www.website-2.com.com"'));
             } catch (e) {
                 return false;
             }
