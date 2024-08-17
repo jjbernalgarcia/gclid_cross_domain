@@ -4,72 +4,78 @@
 try {
     (function() {
         var gclidCookieName = 'gclid';
-        // Function to get cookie value by name
+        
         function getCookie(name) {
             var value = "; " + document.cookie;
             var parts = value.split("; " + name + "=");
             if (parts.length == 2) return parts.pop().split(";").shift();
             return null;
         }
-        // Get gclid from the cookie
+        
         var gclidValue = getCookie(gclidCookieName);
         
         if (!gclidValue) {
-            return; // if no gclid found in the cookie, do nothing
+            return;
         }
-        // Function to add gclid to the URL
+        
         function addGclidToUrl(url) {
-            var urlObj = new URL(url);
-            if (urlObj.origin === "https://www.website-2.com.com") {
-                // Direct link to website-2.com.com"
-                if (!urlObj.searchParams.has('gclid')) {
-                    urlObj.searchParams.set('gclid', gclidValue);
-                }
-            } else if (urlObj.origin === "https://www.affiliate-marketing-redirect.com") {
-                //affiliate-marketing-redirect link
-                var htmlUrl = urlObj.searchParams.get('htmlurl');
-                if (htmlUrl) {
-                    var htmlUrlObj = new URL(htmlUrl);
-                    if (!htmlUrlObj.searchParams.has('gclid')) {
-                        htmlUrlObj.searchParams.set('gclid', gclidValue);
-                        urlObj.searchParams.set('htmlurl', htmlUrlObj.toString());
-                    }
-                }
-            }
-            return urlObj.toString();
-        }
-        // Function to check if a URL matches our target pattern
-        function isTargetUrl(url) {
             try {
                 var urlObj = new URL(url);
-                return urlObj.origin === "https://www.website-2.com" ||
-                       (urlObj.origin === "https://www.affiliate-marketing-redirect.com" && 
-                        urlObj.searchParams.has('htmlurl') && 
-                        urlObj.searchParams.get('htmlurl').includes('https://www.website-2.com.com"'));
+                if (isTargetUrl(urlObj.hostname)) {
+                    if (!urlObj.searchParams.has('gclid')) {
+                        urlObj.searchParams.set('gclid', gclidValue);
+                    }
+                }
+                return urlObj.toString();
             } catch (e) {
-                return false;
+                return url;
             }
         }
-        // Find all links and modify those matching our target pattern
-        var links = document.getElementsByTagName('a');
         
-        for (var i = 0; i < links.length; i++) {
-            if (isTargetUrl(links[i].href)) {
-                links[i].href = addGclidToUrl(links[i].href);
+        function isTargetUrl(hostname) {
+            var targetDomains = [
+                "destination1.com", "www.destination1.com",
+                "destination2.com", "www.destination2.com",
+                "destination3.com", "www.destination3.com",
+                "destination4.com", "www.destination4.com"
+            ];
+            return targetDomains.includes(hostname);
+        }
+        
+        function modifyLinks() {
+            var links = document.getElementsByTagName('a');
+            
+            for (var i = 0; i < links.length; i++) {
+                var urlObj = new URL(links[i].href, window.location.href);
+                if (isTargetUrl(urlObj.hostname)) {
+                    links[i].href = addGclidToUrl(links[i].href);
+                }
             }
         }
-        // Also add click event listener for dynamic link changes
+        
+        modifyLinks();
+        
         document.body.addEventListener('click', function(event) {
-            var target = event.target;
-            while (target && target.tagName.toLowerCase() !== 'a') {
-                target = target.parentElement;
-            }
-            if (target && target.tagName.toLowerCase() === 'a' && isTargetUrl(target.href)) {
-                target.href = addGclidToUrl(target.href);
+            var target = event.target.closest('a');
+            if (target) {
+                var urlObj = new URL(target.href, window.location.href);
+                if (isTargetUrl(urlObj.hostname)) {
+                    target.href = addGclidToUrl(target.href);
+                }
             }
         }, false);
+        
+        var observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.type === 'childList') {
+                    modifyLinks();
+                }
+            });
+        });
+        
+        observer.observe(document.body, { childList: true, subtree: true });
     })();
 } catch (e) {
-    console.error('Error occurred in the gclid_url_enrichment tag:', e);
+    // Silently catch any errors
 }
 </script>
